@@ -1,0 +1,8 @@
+name: Acquisition
+version: 0.1
+main: com.imyvm.spigot.Acquisition
+
+commands:
+  acq:
+    description: All commands
+    aliases: [acquisition]
