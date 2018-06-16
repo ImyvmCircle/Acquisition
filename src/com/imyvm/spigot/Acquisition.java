@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -41,8 +42,8 @@ public class Acquisition extends JavaPlugin {
         getCommand("acq").setExecutor(new Commands(this));
 
         // 定时更新一次
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        new BukkitRunnable() {
+            @Override
             public void run() {
                 try {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "acq update");
@@ -50,7 +51,7 @@ public class Acquisition extends JavaPlugin {
                     e.printStackTrace();
                 }
             }
-        }, 2000, 1000 * 60 * t);
+        }.runTaskTimer(this, 0L, 20L * 60 * t);
 
         // Bukkit.getServer().getPluginManager().registerEvents(new test(this), this);
     }
