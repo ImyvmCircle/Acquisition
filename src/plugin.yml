@@ -1,6 +1,7 @@
 name: Acquisition
 version: 0.1
 main: com.imyvm.spigot.Acquisition
+api-version: 1.13
 
 commands:
   acq:
