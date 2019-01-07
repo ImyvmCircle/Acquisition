@@ -2,5 +2,6 @@
 Acquisition plugin for imyvm server
 
 ### Command
-- /acq add
-- /acq update
+- /acq add [Material] [Buy Price] [Sell Price]  (Only for admin)
+- /acq sell [(optional)Amount]
+- /acq buy (Only for builder)
