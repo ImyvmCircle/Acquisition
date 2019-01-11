@@ -44,7 +44,7 @@ public class Commands implements CommandExecutor {
             if (sender.hasPermission("acquisition.add")){
                 String loc = getLiteStringFromLocation(((Player) sender).getLocation());
                 //player.add(((Player) sender).getUniqueId().toString());
-                locations.add(loc + ":" + args[1] + ":" + args[2]); //Location:Material Name:Price
+                locations.add(loc + ":" + args[1] + ":" + args[2] + ":" + args[3]); //Location:Material Name:Price
                 plugin.getConfig().set("Locations", locations);
                 plugin.saveConfig();
                 sender.sendMessage("Locations Added!");
@@ -87,7 +87,7 @@ public class Commands implements CommandExecutor {
 
         if (cmd.equalsIgnoreCase("sell")) {
             Player p = (Player) sender;
-            AcqInstance acqInstance = AcqManager.getCurrentAcq();
+            AcqInstance acqInstance = plugin.acq.getCurrentAcq();
             if (acqInstance == null) {
                 sender.sendMessage("当前无收购");
                 return false;
@@ -137,9 +137,21 @@ public class Commands implements CommandExecutor {
 
         if (cmd.equalsIgnoreCase("buy")) {
             if (!sender.hasPermission("acquisition.buy")) {
+                sender.sendMessage("§4You don't have the permission!");
                 return false;
             }
             OpenAcqGUI((Player) sender, locations);
+        }
+
+        if (cmd.equalsIgnoreCase("new")) {
+            if (!sender.isOp()) {
+                sender.sendMessage("§4You don't have the permission!");
+                return false;
+            }
+            if (!econ.has(Bukkit.getOfflinePlayer(UUID.fromString(MoneyUUID)), 8)) {
+                return false;
+            }
+            boolean success = plugin.acq.newRequisition();
         }
         return true;
     }

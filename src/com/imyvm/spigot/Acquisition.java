@@ -20,6 +20,7 @@ public class Acquisition extends JavaPlugin {
     private static int HintInterval;
     private static String MoneyUUID;
     public static Economy econ = null;
+    public AcqManager acq;
 
     @Override
     public void onDisable() {
@@ -53,7 +54,7 @@ public class Acquisition extends JavaPlugin {
         System.out.println(t);
 
         getCommand("acq").setExecutor(new Commands(this));
-        AcqManager acq = new AcqManager(this);
+        acq = new AcqManager(this);
         InvListener InvListener = new InvListener(this);
 
         RegisteredServiceProvider<Economy> economyP = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);

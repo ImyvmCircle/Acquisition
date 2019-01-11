@@ -47,22 +47,32 @@ public class AcqManager extends BukkitRunnable {
     public boolean newRequisition() {
         if (currentReq != null) return false;
         if (locations.isEmpty()) return false;
+
         int loc = new Random().nextInt(locations.size());
         String random = locations.get(loc);
-
         Location location = Commands.getLiteLocationFromString(random);
         Block chest = location.getBlock();
         int amount = getamount(((Chest) chest.getState()).getInventory());
+
         if (amount >= 54 * 64) {
+            List<String> real_loc = new ArrayList<>();
             for (String loca : locations) {
                 location = Commands.getLiteLocationFromString(loca);
                 chest = location.getBlock();
                 amount = getamount(((Chest) chest.getState()).getInventory());
                 random = loca;
                 if (amount < 54 * 64) {
-                    break;
+                    real_loc.add(loca);
                 }
             }
+            if (!real_loc.isEmpty()) {
+                loc = new Random().nextInt(real_loc.size());
+                random = real_loc.get(loc);
+                location = Commands.getLiteLocationFromString(random);
+                chest = location.getBlock();
+                amount = getamount(((Chest) chest.getState()).getInventory());
+            }
+
         }
         if (amount >= 54 * 64) {
             Bukkit.broadcastMessage("§4收购所已满");
@@ -87,7 +97,7 @@ public class AcqManager extends BukkitRunnable {
         return true;
     }
 
-    public static AcqInstance getCurrentAcq() {
+    public AcqInstance getCurrentAcq() {
         return currentReq;
     }
 
