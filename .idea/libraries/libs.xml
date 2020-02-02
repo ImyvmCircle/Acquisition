@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/NyaaCore-mc1.14.3-6.4.333-shadowed.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/spigot-1.14.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/Vault.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

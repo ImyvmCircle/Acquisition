@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Acquisition">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/artifacts/Acquisition/Acquisition.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

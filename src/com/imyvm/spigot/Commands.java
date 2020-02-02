@@ -1,5 +1,6 @@
 package com.imyvm.spigot;
 
+import cat.nyaa.nyaacore.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,9 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import static com.imyvm.spigot.Acquisition.econ;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Commands implements CommandExecutor {
     private Acquisition plugin;
@@ -135,6 +134,68 @@ public class Commands implements CommandExecutor {
             }
         }
 
+        if (cmd.equalsIgnoreCase("csell")){
+            if (!sender.hasPermission("acquisition.csell")) {
+                sender.sendMessage("§4You don't have the permission!");
+                return false;
+            }
+            Player p = (Player) sender;
+            if (locations == null || locations.size() == 0) {
+                sender.sendMessage("No Chest added!");
+                return false;
+            }
+            if (args.length == 1){
+                return false;
+            }
+            int matCode = -1;
+            try {
+                matCode = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§c错误,请联系管理员处理");
+                return false;
+            }
+            if (matCode == -1 || matCode >= locations.size()){
+                sender.sendMessage("§c错误,请联系管理员处理");
+                return false;
+            }
+            String random = locations.get(matCode);
+            Location location = Commands.getLiteLocationFromString(random);
+            Block chest = location.getBlock();
+            int amount = getamount(((Chest) chest.getState()).getInventory());
+
+            if (amount >= 54 * 64) {
+                sender.sendMessage("§4收购所已满");
+                return false;
+            }
+
+            final String[] parts = random.split(":");
+            double unitPrice = Double.parseDouble(parts[5]) / 64;
+            int remain_amount = 54 * 64 - amount;
+            ItemStack itemStack = new ItemStack(Objects.requireNonNull(Material.getMaterial(parts[4])), remain_amount);
+
+            double price = forcepurchase(p, remain_amount, itemStack, location, unitPrice);
+            DecimalFormat df = new DecimalFormat("0.00");
+            if (price < 0) {
+                if (price == -1) {
+                    sender.sendMessage("§4该物品收购已满");
+                    return false;
+                } else if (price == -2) {
+                    sender.sendMessage("§4所出售物品不匹配");
+                    return false;
+                } else if (price == -3) {
+                    sender.sendMessage("§4收购所资金不足");
+                    return false;
+                } else {
+                    sender.sendMessage("§4出售失败");
+                    return false;
+                }
+            } else {
+                sender.sendMessage("§b出售成功,获得" + df.format(price) + " D");
+                econ.depositPlayer(p, price);
+                econ.withdrawPlayer(Bukkit.getOfflinePlayer(UUID.fromString(MoneyUUID)), price);
+            }
+        }
+
         if (cmd.equalsIgnoreCase("buy")) {
             if (!sender.hasPermission("acquisition.buy")) {
                 sender.sendMessage("§4You don't have the permission!");
@@ -226,9 +287,13 @@ public class Commands implements CommandExecutor {
             ItemStack item = new ItemStack(Material.getMaterial(parts[4]));
             ItemMeta meta = item.getItemMeta();
             List<String> lores = new ArrayList<>();
-            lores.add("§4建筑师专用");
+//            lores.add("§4建筑师专用");
             lores.add("§b点击购买");
-            lores.add("§b价格: " + parts[6] + " D/组");
+            if (player.hasPermission("acquisition.builder")){
+                lores.add("§b价格: " + parts[6] + " D/组");
+            }else {
+                lores.add("§b价格: " + parts[5] + " D/组");
+            }
             lores.add("§b库存: " + amount);
             lores.add(a);
             meta.setLore(lores);
@@ -237,5 +302,34 @@ public class Commands implements CommandExecutor {
         }
         player.openInventory(inv);
         player.updateInventory();
+    }
+
+    public double forcepurchase(Player p, int amountRemains, ItemStack itemStack, Location location, Double unitPrice) {
+        if (amountRemains <= 0) return -1; // 收购所满了
+        ItemStack itemHand = p.getInventory().getItemInMainHand();
+        if (!itemStack.isSimilar(itemHand)) return -2; //物品不匹配
+        int amount = itemHand.getAmount();
+        if (amountRemains < amount) amount = amountRemains;
+        if (!econ.has(Bukkit.getOfflinePlayer(UUID.fromString(MoneyUUID)), unitPrice * amount)) {
+            return -3;  // 收购所钱不足
+        }
+        int new_amount = itemHand.getAmount() - amount;
+        if (new_amount == 0) {
+            p.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+        } else {
+            itemHand.setAmount(new_amount);
+        }
+        Block chest = location.getBlock();
+        if (chest.getType().equals(Material.CHEST)) {
+            Inventory inventory = ((Chest) chest.getState()).getInventory();
+            ItemStack additem = new ItemStack(itemStack.getType(), amount);
+            ItemMeta im = additem.getItemMeta();
+            im.setLore(lore);
+            additem.setItemMeta(im);
+            inventory.addItem(additem);
+        } else {
+            new Message("123,245箱子不存在").broadcast();
+        }
+        return unitPrice * amount;
     }
 }
